@@ -15,6 +15,11 @@ SECONDARY_TX="0200000000010182aabd8115c43e5b37a1b0c77a409b229896a2ffd255098c8056
 TEST_PRIVATE_KEY="L27QxBowwWzRPVuLCCwGxAwehP6uGaDsrC8K4wmPjxdbjztrGJZb"
 TEST_ADDRESS="mxqPaW7UH8F82R7dN6bsBbntnzFNbFYkMm"
 
+# Helper: convert satoshis to BTC with proper leading zero (e.g. 0.15000000 not .15000000)
+sats_to_btc() {
+  printf "%.8f" "$(echo "scale=8; $1 / 100000000" | bc)"
+}
+
 # =========================================================================
 # CHALLENGE 1: Transaction Analysis
 # =========================================================================
@@ -109,8 +114,8 @@ PAYMENT_AMOUNT=15000000
 CHANGE_AMOUNT=$(( UTXO_VALUE - PAYMENT_AMOUNT - FEE_SATS ))
 check_cmd "Change calculation" "CHANGE_AMOUNT" "$CHANGE_AMOUNT"
 
-PAYMENT_BTC=$(echo "scale=8; $PAYMENT_AMOUNT / 100000000" | bc)
-CHANGE_BTC=$(echo "scale=8; $CHANGE_AMOUNT / 100000000" | bc)
+PAYMENT_BTC=$(sats_to_btc $PAYMENT_AMOUNT)
+CHANGE_BTC=$(sats_to_btc $CHANGE_AMOUNT)
 
 TX_OUTPUTS='{"'$PAYMENT_ADDRESS'":'$PAYMENT_BTC',"'$CHANGE_ADDRESS'":'$CHANGE_BTC'}'
 check_cmd "Output JSON creation" "TX_OUTPUTS" "$TX_OUTPUTS"
@@ -207,7 +212,7 @@ CHILD_RECIPIENT="2MvM2nZjueT9qQJgZh7LBPoudS554B6arQc"
 CHILD_SEND_AMOUNT=$(( CHANGE_AMOUNT - CHILD_FEE_SATS ))
 check_cmd "Child amount calculation" "CHILD_SEND_AMOUNT" "$CHILD_SEND_AMOUNT"
 
-CHILD_SEND_BTC=$(echo "scale=8; $CHILD_SEND_AMOUNT / 100000000" | bc)
+CHILD_SEND_BTC=$(sats_to_btc $CHILD_SEND_AMOUNT)
 
 CHILD_OUTPUTS='{"'$CHILD_RECIPIENT'":'$CHILD_SEND_BTC'}'
 check_cmd "Child output creation" "CHILD_OUTPUTS" "$CHILD_OUTPUTS"
@@ -242,7 +247,7 @@ TIMELOCK_FEE=1000
 TIMELOCK_AMOUNT=$(( SECONDARY_OUTPUT_VALUE - TIMELOCK_FEE ))
 check_cmd "Timelock amount calculation" "TIMELOCK_AMOUNT" "$TIMELOCK_AMOUNT"
 
-TIMELOCK_BTC=$(echo "scale=8; $TIMELOCK_AMOUNT / 100000000" | bc)
+TIMELOCK_BTC=$(sats_to_btc $TIMELOCK_AMOUNT)
 
 TIMELOCK_OUTPUTS='{"'$TIMELOCK_ADDRESS'":'$TIMELOCK_BTC'}'
 check_cmd "Timelock output creation" "TIMELOCK_OUTPUTS" "$TIMELOCK_OUTPUTS"
